@@ -13,8 +13,8 @@ class FileCorrupted(Exception):
 
 def logged(exception, mode):
     """
-    exception — тип винятку, який треба перехоплювати
-    mode — "console" або "file"
+    exception — the type of exception to be caught
+    mode — either 'console' or 'file'
     """
 
     def decorator(func):
