@@ -17,35 +17,35 @@ def logged(exception, mode):
     mode — either 'console' or 'file'
     """
 
+  
+    logger = logging.getLogger("yaml_manager_logger")
+    logger.setLevel(logging.ERROR)
+
+    if not logger.handlers:
+      
+        if mode == "console":
+            handler = logging.StreamHandler()
+        elif mode == "file":
+            handler = logging.FileHandler("logs.txt", encoding="utf-8")
+        else:
+            raise ValueError("Mode must be 'console' or 'file'.")
+
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            logger = logging.getLogger(func.__name__)
-            logger.setLevel(logging.ERROR)
-                            
-            if logger.hasHandlers():
-                logger.handlers.clear()
-
-            if mode == "console":
-                handler = logging.StreamHandler()
-            elif mode == "file":
-                handler = logging.FileHandler("logs.txt", encoding="utf-8")
-            else:
-                raise ValueError("Mode must be 'console' or 'file'.")
-
-            formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
-
             try:
                 return func(*args, **kwargs)
             except exception as e:
                 logger.error(f"Caught exception: {str(e)}")
                 raise
-
         return wrapper
 
     return decorator
+
 
 class YamlManager:
 
@@ -53,11 +53,12 @@ class YamlManager:
     def __init__(self, filename):
         self.filename = filename
 
+    
         if not os.path.exists(filename):
             with open(filename, "w", encoding="utf-8") as f:
                 yaml.dump({}, f)
 
-            raise FileNotFound(f"Файл '{filename}' не існував, тому був створений.")
+            print(f"Файл '{filename}' не існував — створено автоматично.")
 
     @logged(FileCorrupted, "file")
     def read(self):
@@ -84,15 +85,11 @@ class YamlManager:
         with open(self.filename, "w", encoding="utf-8") as f:
             yaml.dump(data, f)
 
+
 def main():
     print("=== Демонстрація роботи YAML-менеджера ===")
 
-    try:
-        mgr = YamlManager("data.yaml")
-    except FileNotFound as e:
-        print("Виняток:", e)
-        print("Файл створено, можна продовжувати.\n")
-        mgr = YamlManager("data.yaml")
+    mgr = YamlManager("data.yaml")
 
     print("Початковий вміст:", mgr.read())
 
@@ -105,3 +102,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
